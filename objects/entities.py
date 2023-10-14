@@ -62,5 +62,5 @@ class PhyicsEntity:
         if self.collisions["down"] or self.collisions["up"]:
             self.velocity.y = 0
 
-    def render(self, surface: pygame.Surface):
-        surface.blit(self.asset, self.position.to_list())
+    def render(self, surface: pygame.Surface, camera_offset: Vector2D):
+        surface.blit(self.asset, (self.position - camera_offset).to_list())

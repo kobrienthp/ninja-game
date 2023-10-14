@@ -57,12 +57,17 @@ class Tilemap:
             if tile["type"] in PHYSICS_TILES
         ]
 
-    def render(self, surface: pygame.Surface):
+    def render(self, surface: pygame.Surface, camera_offset: Vector2D):
         for tile in self.offgrid_tiles:
-            surface.blit(self.assets[tile["type"]][tile["variant"]], tile["position"])
+            surface.blit(
+                self.assets[tile["type"]][tile["variant"]],
+                (Vector2D(*tile["position"]) - camera_offset).to_list(),
+            )
 
         for tile in self.tilemap.values():
             surface.blit(
                 self.assets[tile["type"]][tile["variant"]],
-                [coord * self.tile_size for coord in tile["position"]],
+                (
+                    Vector2D(*tile["position"]) * self.tile_size - camera_offset
+                ).to_list(),
             )

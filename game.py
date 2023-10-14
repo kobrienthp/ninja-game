@@ -38,6 +38,7 @@ class Game:
             size=(8, 15),
             asset=self.assets.get("player"),
         )
+        self.scroll = Vector2D(0, 0)
         self.tilemap = Tilemap(
             assets={
                 key: val
@@ -85,8 +86,15 @@ class Game:
                 ),
                 movement=player_movement,
             )
-            self.tilemap.render(surface=self.display)
-            self.player.render(surface=self.display)
+            self.scroll += (
+                Vector2D(*self.player.rect().center)
+                - Vector2D(self.display.get_width(), self.display.get_height()) / 2
+                - self.scroll
+            ) / 30
+            render_scroll = self.scroll.round()
+
+            self.tilemap.render(surface=self.display, camera_offset=render_scroll)
+            self.player.render(surface=self.display, camera_offset=render_scroll)
             self.screen.blit(
                 pygame.transform.scale(self.display, self.screen.get_size()),
                 (0, 0),
