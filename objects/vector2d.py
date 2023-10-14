@@ -6,6 +6,9 @@ class Vector2D:
         self.x = x
         self.y = y
 
+    def round(self):
+        return Vector2D(x=int(self.x), y=int(self.y))
+
     def __add__(self, v):
         return Vector2D(x=self.x + v.x, y=self.y + v.y)
 
@@ -17,6 +20,9 @@ class Vector2D:
             return Vector2D(x=self.x * v.x, y=self.y * v.y)
         elif isinstance(v, (int, float)):
             return Vector2D(x=self.x * v, y=self.y * v)
+
+    def __truediv__(self, scalar):
+        return Vector2D(x=self.x / scalar, y=self.y / scalar)
 
     def __IADD__(self, v):
         return self + v
