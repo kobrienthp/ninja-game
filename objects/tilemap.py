@@ -64,7 +64,21 @@ class Tilemap:
                 (Vector2D(*tile["position"]) - camera_offset).to_list(),
             )
 
-        for tile in self.tilemap.values():
+        # render only tiles which are on screen
+        tiles_to_render = [
+            self.tilemap.get((xcoord, ycoord))
+            for xcoord in range(
+                camera_offset.x // self.tile_size,
+                (camera_offset.x + surface.get_width()) // self.tile_size + 1,
+            )
+            for ycoord in range(
+                camera_offset.y // self.tile_size,
+                (camera_offset.y + surface.get_height()) // self.tile_size + 1,
+            )
+            if self.tilemap.get((xcoord, ycoord))
+        ]
+
+        for tile in tiles_to_render:
             surface.blit(
                 self.assets[tile["type"]][tile["variant"]],
                 (
