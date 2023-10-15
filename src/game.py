@@ -14,6 +14,12 @@ from utils import util_funcs
 class Game:
     def __init__(self) -> None:
         pygame.init()
+        pygame.joystick.init()
+
+        try:
+            self.joystick = pygame.joystick.Joystick(0)
+        except:
+            pass
 
         self.screen = pygame.display.set_mode(size=(640, 480))
         self.assets = {
@@ -64,6 +70,13 @@ class Game:
                     pygame.quit()
                     sys.exit()
 
+                if event.type == pygame.JOYAXISMOTION:
+                    if event.axis == 0:
+                        player_movement[event.axis] = event.value
+                if event.type == pygame.JOYBUTTONDOWN:
+                    if event.button == 1:
+                        self.player.velocity.y = -3
+
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_k:
                         player_movement[1] = -1
@@ -84,6 +97,10 @@ class Game:
                         player_movement[0] = 0
                     if event.key == pygame.K_l:
                         player_movement[0] = 0
+
+            for coord in range(len(player_movement)):
+                if abs(player_movement[coord]) < 0.2:
+                    player_movement[coord] = 0
 
             self.display.blit(self.assets["background"], (0, 0))
             self.player.update(
