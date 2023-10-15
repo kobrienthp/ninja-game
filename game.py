@@ -5,6 +5,7 @@ import pygame
 
 import utils
 from constants import BASE_IMAGE_PATH
+from objects.clouds import Clouds
 from objects.entities import EntityType, PhyicsEntity
 from objects.tilemap import Tilemap
 from objects.vector2d import Vector2D
@@ -29,8 +30,13 @@ class Game:
                 *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/stone/*.png")))
             ),
             "player": utils.load_image(BASE_IMAGE_PATH / "entities/player.png"),
+            "background": utils.load_image(BASE_IMAGE_PATH / "background.png"),
+            "clouds": utils.load_images(
+                *sorted(glob.glob(str(BASE_IMAGE_PATH / "clouds/*.png")))
+            ),
         }
         self.clock = pygame.time.Clock()
+        self.clouds = Clouds(cloud_images=self.assets["clouds"], count=16)
         self.display = pygame.Surface((320, 240))
         self.player = PhyicsEntity(
             entity_type=EntityType.PLAYER,
@@ -79,7 +85,7 @@ class Game:
                     if event.key == pygame.K_l:
                         player_movement[0] = 0
 
-            self.display.fill((14, 219, 248))
+            self.display.blit(self.assets["background"], (0, 0))
             self.player.update(
                 collision_rects=self.tilemap.physics_rects_near_position(
                     self.player.position.to_tuple()
@@ -93,6 +99,9 @@ class Game:
             ) / 30
             render_scroll = self.scroll.round()
 
+            self.clouds.update()
+            self.clouds.update()
+            self.clouds.render(self.display, offset=render_scroll)
             self.tilemap.render(surface=self.display, camera_offset=render_scroll)
             self.player.render(surface=self.display, camera_offset=render_scroll)
             self.screen.blit(
