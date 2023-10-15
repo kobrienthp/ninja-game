@@ -5,10 +5,11 @@ import pygame
 
 from constants import BASE_IMAGE_PATH
 from objects.clouds import Clouds
-from objects.entities import EntityType, PhyicsEntity
+from objects.entities import Player
 from objects.tilemap import Tilemap
 from objects.vector2d import Vector2D
 from utils import util_funcs
+from utils.animation import Animation
 
 
 class Game:
@@ -23,40 +24,56 @@ class Game:
 
         self.screen = pygame.display.set_mode(size=(640, 480))
         self.assets = {
-            "decor": util_funcs.load_images(
-                *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/decor/*.png")))
-            ),
-            "large_decor": util_funcs.load_images(
-                *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/large_decor/*.png")))
-            ),
-            "grass": util_funcs.load_images(
-                *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/grass/*.png")))
-            ),
-            "stone": util_funcs.load_images(
-                *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/stone/*.png")))
-            ),
-            "player": util_funcs.load_image(BASE_IMAGE_PATH / "entities/player.png"),
+            "decor": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/decor/*.png")))),
+            "large_decor": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/large_decor/*.png")))),
+            "grass": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/grass/*.png")))),
+            "stone": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/stone/*.png")))),
             "background": util_funcs.load_image(BASE_IMAGE_PATH / "background.png"),
-            "clouds": util_funcs.load_images(
-                *sorted(glob.glob(str(BASE_IMAGE_PATH / "clouds/*.png")))
-            ),
+            "clouds": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "clouds/*.png")))),
+            "player": {
+                "idle": Animation(
+                    images=util_funcs.load_images(
+                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/idle/*.png")))
+                    ),
+                    image_duration=6,
+                ),
+                "run": Animation(
+                    images=util_funcs.load_images(
+                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/run/*.png")))
+                    ),
+                    image_duration=6,
+                ),
+                "jump": Animation(
+                    images=util_funcs.load_images(
+                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/jump/*.png")))
+                    ),
+                    image_duration=5,
+                ),
+                "slide": Animation(
+                    images=util_funcs.load_images(
+                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/slide/*.png")))
+                    ),
+                    image_duration=5,
+                ),
+                "wall_slide": Animation(
+                    images=util_funcs.load_images(
+                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/wall_slide/*.png")))
+                    ),
+                    image_duration=5,
+                ),
+            },
         }
         self.clock = pygame.time.Clock()
         self.clouds = Clouds(cloud_images=self.assets["clouds"], count=16)
         self.display = pygame.Surface((320, 240))
-        self.player = PhyicsEntity(
-            entity_type=EntityType.PLAYER,
+        self.player = Player(
             position=(50, 50),
             size=(8, 15),
-            asset=self.assets.get("player"),
+            assets={"player": self.assets.get("player")},
         )
         self.scroll = Vector2D(0, 0)
         self.tilemap = Tilemap(
-            assets={
-                key: val
-                for key, val in self.assets.items()
-                if key in ["grass", "stone"]
-            },
+            assets={key: val for key, val in self.assets.items() if key in ["grass", "stone"]},
             tile_size=16,
         )
 
@@ -104,9 +121,7 @@ class Game:
 
             self.display.blit(self.assets["background"], (0, 0))
             self.player.update(
-                collision_rects=self.tilemap.physics_rects_near_position(
-                    self.player.position.to_tuple()
-                ),
+                collision_rects=self.tilemap.physics_rects_near_position(self.player.position.to_tuple()),
                 movement=player_movement,
             )
             self.scroll += (
