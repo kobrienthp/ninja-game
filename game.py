@@ -3,12 +3,12 @@ import sys
 
 import pygame
 
-import utils
 from constants import BASE_IMAGE_PATH
 from objects.clouds import Clouds
 from objects.entities import EntityType, PhyicsEntity
 from objects.tilemap import Tilemap
 from objects.vector2d import Vector2D
+from utils import util_funcs
 
 
 class Game:
@@ -17,21 +17,21 @@ class Game:
 
         self.screen = pygame.display.set_mode(size=(640, 480))
         self.assets = {
-            "decor": utils.load_images(
+            "decor": util_funcs.load_images(
                 *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/decor/*.png")))
             ),
-            "large_decor": utils.load_images(
+            "large_decor": util_funcs.load_images(
                 *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/large_decor/*.png")))
             ),
-            "grass": utils.load_images(
+            "grass": util_funcs.load_images(
                 *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/grass/*.png")))
             ),
-            "stone": utils.load_images(
+            "stone": util_funcs.load_images(
                 *sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/stone/*.png")))
             ),
-            "player": utils.load_image(BASE_IMAGE_PATH / "entities/player.png"),
-            "background": utils.load_image(BASE_IMAGE_PATH / "background.png"),
-            "clouds": utils.load_images(
+            "player": util_funcs.load_image(BASE_IMAGE_PATH / "entities/player.png"),
+            "background": util_funcs.load_image(BASE_IMAGE_PATH / "background.png"),
+            "clouds": util_funcs.load_images(
                 *sorted(glob.glob(str(BASE_IMAGE_PATH / "clouds/*.png")))
             ),
         }
