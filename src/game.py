@@ -7,7 +7,7 @@ from constants import BASE_IMAGE_PATH
 from objects.clouds import Clouds
 from objects.entities import Player
 from objects.tilemap import Tilemap
-from objects.vector2d import Vector2D
+from utils.vector import Vector2D
 from utils import util_funcs
 from utils.animation import Animation
 
@@ -121,7 +121,7 @@ class Game:
 
             self.display.blit(self.assets["background"], (0, 0))
             self.player.update(
-                collision_rects=self.tilemap.physics_rects_near_position(self.player.position.to_tuple()),
+                collision_rects=self.tilemap.physics_rects_near_position(self.player.position),
                 movement=player_movement,
             )
             self.scroll += (

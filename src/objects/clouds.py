@@ -3,7 +3,7 @@ from typing import Tuple
 
 import pygame
 
-from objects.vector2d import Vector2D
+from utils.vector import Vector2D
 
 
 class Cloud:
@@ -23,12 +23,8 @@ class Cloud:
             (
                 render_position
                 % Vector2D(
-                    surface.get_width()
-                    + self.image.get_width()
-                    - self.image.get_width(),
-                    surface.get_height()
-                    + self.image.get_height()
-                    - self.image.get_height(),
+                    surface.get_width() + self.image.get_width() - self.image.get_width(),
+                    surface.get_height() + self.image.get_height() - self.image.get_height(),
                 )
             ).to_tuple(),
         )

@@ -4,7 +4,7 @@ from typing import Dict, List, Tuple
 import pygame
 
 from objects.tilemap import Tilemap
-from objects.vector2d import Vector2D
+from utils.vector import Vector2D
 
 
 class EntityType(Enum):
@@ -89,7 +89,7 @@ class PhyicsEntity:
     def render(self, surface: pygame.Surface, camera_offset: Vector2D) -> None:
         surface.blit(
             pygame.transform.flip(self.animation.get_current_image(), self.flip, False),
-            (self.position - camera_offset + self.animation_offset).to_list(),
+            (self.position - camera_offset + self.animation_offset).coordinates,
         )
 
 

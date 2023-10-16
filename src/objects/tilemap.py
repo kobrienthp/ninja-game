@@ -3,7 +3,7 @@ from typing import Dict, List
 import pygame
 
 from constants import NEIGHBOR_OFFSETS, PHYSICS_TILES
-from objects.vector2d import Vector2D
+from utils.vector import Vector2D
 
 
 class Tilemap:
@@ -31,28 +31,15 @@ class Tilemap:
             },
         }
 
-    def tiles_near_position(self, position: tuple) -> List:
-        locations_to_check = [
-            (
-                Vector2D(*(int(coord // self.tile_size) for coord in position))
-                + Vector2D(*offset)
-            ).to_tuple()
-            for offset in NEIGHBOR_OFFSETS
-        ]
+    def tiles_near_position(self, position: Vector2D) -> List:
+        locations_to_check = [position // self.tile_size + offset for offset in NEIGHBOR_OFFSETS]
 
-        return [
-            self.tilemap.get(location)
-            for location in locations_to_check
-            if location in self.tilemap.keys()
-        ]
+        return [self.tilemap.get(location) for location in locations_to_check if location in self.tilemap.keys()]
 
-    def physics_rects_near_position(self, position: tuple) -> List:
+    def physics_rects_near_position(self, position: Vector2D) -> List:
+        print()
         return [
-            pygame.Rect(
-                *(Vector2D(*tile["position"]) * self.tile_size),
-                self.tile_size,
-                self.tile_size
-            )
+            pygame.Rect(*(tile["position"] * self.tile_size), self.tile_size, self.tile_size)
             for tile in self.tiles_near_position(position=position)
             if tile["type"] in PHYSICS_TILES
         ]
@@ -61,12 +48,12 @@ class Tilemap:
         for tile in self.offgrid_tiles:
             surface.blit(
                 self.assets[tile["type"]][tile["variant"]],
-                (Vector2D(*tile["position"]) - camera_offset).to_list(),
+                (tile["position"] - camera_offset).coordinates,
             )
 
         # render only tiles which are on screen
         tiles_to_render = [
-            self.tilemap.get((xcoord, ycoord))
+            self.tilemap.get(str((xcoord, ycoord)))
             for xcoord in range(
                 camera_offset.x // self.tile_size,
                 (camera_offset.x + surface.get_width()) // self.tile_size + 1,
@@ -75,13 +62,11 @@ class Tilemap:
                 camera_offset.y // self.tile_size,
                 (camera_offset.y + surface.get_height()) // self.tile_size + 1,
             )
-            if self.tilemap.get((xcoord, ycoord))
+            if self.tilemap.get(str((xcoord, ycoord)))
         ]
 
         for tile in tiles_to_render:
             surface.blit(
                 self.assets[tile["type"]][tile["variant"]],
-                (
-                    Vector2D(*tile["position"]) * self.tile_size - camera_offset
-                ).to_list(),
+                (tile["position"] * self.tile_size - camera_offset).coordinates,
             )
