@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 import pygame
 
-from objects.vector2d import Vector2D
+from utils.vector import Vector2D
 
 
 class Sprite:
@@ -24,9 +24,7 @@ class Sprite:
         if image:
             self.image = pygame.image.load(image)
         if colorkey:
-            assert len(colorkey) == 3 and all(
-                [i < 256 for i in colorkey]
-            ), "invalid `colorkey`"
+            assert len(colorkey) == 3 and all([i < 256 for i in colorkey]), "invalid `colorkey`"
             self.colorkey = colorkey
             self.image.set_colorkey(self.colorkey)
         if color:
