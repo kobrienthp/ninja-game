@@ -49,9 +49,9 @@ class PhyicsEntity:
 
     def update(self, collision_rects: Tilemap, movement: List = [0, 0]) -> None:
         self.collisions = {"up": False, "down": False, "right": False, "left": False}
+
         delta_position = self.velocity + Vector2D(*movement)
         self.position.x += delta_position.x
-
         entity_rect = self.rect()
         for rect in collision_rects:
             if entity_rect.colliderect(rect):
@@ -63,7 +63,6 @@ class PhyicsEntity:
                     self.collisions["left"] = True
                 self.position.x = entity_rect.x
 
-        delta_position = self.velocity + Vector2D(*movement)
         self.position.y += delta_position.y
         entity_rect = self.rect()
         for rect in collision_rects:
