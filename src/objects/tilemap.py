@@ -11,25 +11,7 @@ class Tilemap:
         self.assets = assets
         self.tile_size = tile_size
         self.offgrid_tiles = []
-
-        self.tilemap = {
-            **{
-                (3 + i, 10): {
-                    "type": "grass",
-                    "variant": 1,
-                    "position": (3 + i, 10),
-                }
-                for i in range(10)
-            },
-            **{
-                (10, 5 + i): {
-                    "type": "stone",
-                    "variant": 1,
-                    "position": (10, 5 + i),
-                }
-                for i in range(10)
-            },
-        }
+        self.tilemap = dict()
 
     def tiles_near_position(self, position: Vector2D) -> List:
         locations_to_check = [position // self.tile_size + offset for offset in NEIGHBOR_OFFSETS]

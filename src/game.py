@@ -132,7 +132,6 @@ class Game:
             render_scroll = self.scroll.round()
 
             self.clouds.update()
-            self.clouds.update()
             self.clouds.render(self.display, offset=render_scroll)
             self.tilemap.render(surface=self.display, camera_offset=render_scroll)
             self.player.render(surface=self.display, camera_offset=render_scroll)
