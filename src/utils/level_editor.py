@@ -1,5 +1,6 @@
 import glob
 import sys
+from pathlib import Path
 
 import pygame
 
@@ -97,6 +98,8 @@ class LevelEditor:
                         self.movement.y = 1
                     if event.key == pygame.K_g:
                         self.on_grid = not self.on_grid
+                    if event.key == pygame.K_o:
+                        self.tilemap.save(Path("data/maps/map.json"))
                     if event.key == pygame.K_LSHIFT:
                         self.shift = True
                 if event.type == pygame.KEYUP:

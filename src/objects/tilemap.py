@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import Dict, List
 
 import pygame
@@ -12,6 +14,10 @@ class Tilemap:
         self.tile_size = tile_size
         self.offgrid_tiles = []
         self.tilemap = dict()
+
+    def save(self, path: Path) -> None:
+        with open(path, "w") as file:
+            json.dump({"tilemap": self.tilemap, "tile_size": self.tile_size, "offgrid_tiles": self.offgrid_tiles}, file)
 
     def tiles_near_position(self, position: Vector2D) -> List:
         locations_to_check = [position // self.tile_size + offset for offset in NEIGHBOR_OFFSETS]
