@@ -16,16 +16,65 @@ class Tilemap:
         self.tilemap = dict()
 
     def save(self, path: Path) -> None:
+        json_tilemap = {
+            key: {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": str(tile["position"]),
+            }
+            for key, tile in self.tilemap.items()
+        }
+        json_offgrid_tiles = [
+            {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": str(tile["position"]),
+            }
+            for tile in self.offgrid_tiles
+        ]
         with open(path, "w") as file:
-            json.dump({"tilemap": self.tilemap, "tile_size": self.tile_size, "offgrid_tiles": self.offgrid_tiles}, file)
+            json.dump({"tilemap": json_tilemap, "tile_size": self.tile_size, "offgrid_tiles": json_offgrid_tiles}, file)
+
+    def load(self, path: Path) -> None:
+        with open(path, "r") as file:
+            map_data = json.load(file)
+
+        self.tilemap = {
+            key: {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": Vector2D(
+                    *tuple(
+                        int(coord)
+                        for coord in tile["position"].replace("(", "").replace(")", "").replace(" ", "").split(",")
+                    ),
+                ),
+            }
+            for key, tile in map_data["tilemap"].items()
+        }
+        self.tile_size = map_data["tile_size"]
+        self.offgrid_tiles = [
+            {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": Vector2D(
+                    *tuple(
+                        float(coord)
+                        for coord in tile["position"].replace("(", "").replace(")", "").replace(" ", "").split(",")
+                    ),
+                ),
+            }
+            for tile in self.offgrid_tiles
+        ]
 
     def tiles_near_position(self, position: Vector2D) -> List:
-        locations_to_check = [position // self.tile_size + offset for offset in NEIGHBOR_OFFSETS]
+        locations_to_check = [position.round() // self.tile_size + offset for offset in NEIGHBOR_OFFSETS]
 
-        return [self.tilemap.get(location) for location in locations_to_check if location in self.tilemap.keys()]
+        return [
+            self.tilemap.get(str(location)) for location in locations_to_check if str(location) in self.tilemap.keys()
+        ]
 
     def physics_rects_near_position(self, position: Vector2D) -> List:
-        print()
         return [
             pygame.Rect(*(tile["position"] * self.tile_size), self.tile_size, self.tile_size)
             for tile in self.tiles_near_position(position=position)
