@@ -1,5 +1,6 @@
 import glob
 import sys
+from pathlib import Path
 
 import pygame
 
@@ -7,9 +8,9 @@ import constants
 from objects.clouds import Clouds
 from objects.entities import Player
 from objects.tilemap import Tilemap
-from utils.vector import Vector2D
 from utils import util_funcs
 from utils.animation import Animation
+from utils.vector import Vector2D
 
 
 class Game:
@@ -78,6 +79,7 @@ class Game:
             assets={key: val for key, val in self.assets.items() if key in ["grass", "stone"]},
             tile_size=16,
         )
+        self.tilemap.load(Path("data/maps/map.json"))
 
         pygame.display.set_caption("Ninja Game")
 
