@@ -1,15 +1,16 @@
 import glob
 import sys
+from pathlib import Path
 
 import pygame
 
-from constants import BASE_IMAGE_PATH
+import constants
 from objects.clouds import Clouds
 from objects.entities import Player
 from objects.tilemap import Tilemap
-from objects.vector2d import Vector2D
 from utils import util_funcs
 from utils.animation import Animation
+from utils.vector import Vector2D
 
 
 class Game:
@@ -22,42 +23,44 @@ class Game:
         except:
             pass
 
-        self.screen = pygame.display.set_mode(size=(640, 480))
+        self.screen = pygame.display.set_mode(size=(constants.SCREENWIDTH, constants.SCREENHEIGHT))
         self.assets = {
-            "decor": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/decor/*.png")))),
-            "large_decor": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/large_decor/*.png")))),
-            "grass": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/grass/*.png")))),
-            "stone": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "tiles/stone/*.png")))),
-            "background": util_funcs.load_image(BASE_IMAGE_PATH / "background.png"),
-            "clouds": util_funcs.load_images(*sorted(glob.glob(str(BASE_IMAGE_PATH / "clouds/*.png")))),
+            "decor": util_funcs.load_images(*sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "tiles/decor/*.png")))),
+            "large_decor": util_funcs.load_images(
+                *sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "tiles/large_decor/*.png")))
+            ),
+            "grass": util_funcs.load_images(*sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "tiles/grass/*.png")))),
+            "stone": util_funcs.load_images(*sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "tiles/stone/*.png")))),
+            "background": util_funcs.load_image(constants.BASE_IMAGE_PATH / "background.png"),
+            "clouds": util_funcs.load_images(*sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "clouds/*.png")))),
             "player": {
                 "idle": Animation(
                     images=util_funcs.load_images(
-                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/idle/*.png")))
+                        *sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "entities/player/idle/*.png")))
                     ),
                     image_duration=6,
                 ),
                 "run": Animation(
                     images=util_funcs.load_images(
-                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/run/*.png")))
+                        *sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "entities/player/run/*.png")))
                     ),
                     image_duration=6,
                 ),
                 "jump": Animation(
                     images=util_funcs.load_images(
-                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/jump/*.png")))
+                        *sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "entities/player/jump/*.png")))
                     ),
                     image_duration=5,
                 ),
                 "slide": Animation(
                     images=util_funcs.load_images(
-                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/slide/*.png")))
+                        *sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "entities/player/slide/*.png")))
                     ),
                     image_duration=5,
                 ),
                 "wall_slide": Animation(
                     images=util_funcs.load_images(
-                        *sorted(glob.glob(str(BASE_IMAGE_PATH / "entities/player/wall_slide/*.png")))
+                        *sorted(glob.glob(str(constants.BASE_IMAGE_PATH / "entities/player/wall_slide/*.png")))
                     ),
                     image_duration=5,
                 ),
@@ -76,6 +79,7 @@ class Game:
             assets={key: val for key, val in self.assets.items() if key in ["grass", "stone"]},
             tile_size=16,
         )
+        self.tilemap.load(Path("data/maps/map.json"))
 
         pygame.display.set_caption("Ninja Game")
 
@@ -121,7 +125,7 @@ class Game:
 
             self.display.blit(self.assets["background"], (0, 0))
             self.player.update(
-                collision_rects=self.tilemap.physics_rects_near_position(self.player.position.to_tuple()),
+                collision_rects=self.tilemap.physics_rects_near_position(self.player.position),
                 movement=player_movement,
             )
             self.scroll += (
@@ -132,7 +136,6 @@ class Game:
             render_scroll = self.scroll.round()
 
             self.clouds.update()
-            self.clouds.update()
             self.clouds.render(self.display, offset=render_scroll)
             self.tilemap.render(surface=self.display, camera_offset=render_scroll)
             self.player.render(surface=self.display, camera_offset=render_scroll)
@@ -142,7 +145,7 @@ class Game:
             )
 
             pygame.display.update()
-            self.clock.tick(60)
+            self.clock.tick(constants.FRAMERATE)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,11 @@
+import json
+from pathlib import Path
 from typing import Dict, List
 
 import pygame
 
 from constants import NEIGHBOR_OFFSETS, PHYSICS_TILES
-from objects.vector2d import Vector2D
+from utils.vector import Vector2D
 
 
 class Tilemap:
@@ -11,48 +13,70 @@ class Tilemap:
         self.assets = assets
         self.tile_size = tile_size
         self.offgrid_tiles = []
+        self.tilemap = dict()
+
+    def save(self, path: Path) -> None:
+        json_tilemap = {
+            key: {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": str(tile["position"]),
+            }
+            for key, tile in self.tilemap.items()
+        }
+        json_offgrid_tiles = [
+            {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": str(tile["position"]),
+            }
+            for tile in self.offgrid_tiles
+        ]
+        with open(path, "w") as file:
+            json.dump({"tilemap": json_tilemap, "tile_size": self.tile_size, "offgrid_tiles": json_offgrid_tiles}, file)
+
+    def load(self, path: Path) -> None:
+        with open(path, "r") as file:
+            map_data = json.load(file)
 
         self.tilemap = {
-            **{
-                (3 + i, 10): {
-                    "type": "grass",
-                    "variant": 1,
-                    "position": (3 + i, 10),
-                }
-                for i in range(10)
-            },
-            **{
-                (10, 5 + i): {
-                    "type": "stone",
-                    "variant": 1,
-                    "position": (10, 5 + i),
-                }
-                for i in range(10)
-            },
+            key: {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": Vector2D(
+                    *tuple(
+                        int(coord)
+                        for coord in tile["position"].replace("(", "").replace(")", "").replace(" ", "").split(",")
+                    ),
+                ),
+            }
+            for key, tile in map_data["tilemap"].items()
         }
-
-    def tiles_near_position(self, position: tuple) -> List:
-        locations_to_check = [
-            (
-                Vector2D(*(int(coord // self.tile_size) for coord in position))
-                + Vector2D(*offset)
-            ).to_tuple()
-            for offset in NEIGHBOR_OFFSETS
+        self.tile_size = map_data["tile_size"]
+        self.offgrid_tiles = [
+            {
+                "type": tile["type"],
+                "variant": tile["variant"],
+                "position": Vector2D(
+                    *tuple(
+                        float(coord)
+                        for coord in tile["position"].replace("(", "").replace(")", "").replace(" ", "").split(",")
+                    ),
+                ),
+            }
+            for tile in self.offgrid_tiles
         ]
 
+    def tiles_near_position(self, position: Vector2D) -> List:
+        locations_to_check = [position.round() // self.tile_size + offset for offset in NEIGHBOR_OFFSETS]
+
         return [
-            self.tilemap.get(location)
-            for location in locations_to_check
-            if location in self.tilemap.keys()
+            self.tilemap.get(str(location)) for location in locations_to_check if str(location) in self.tilemap.keys()
         ]
 
-    def physics_rects_near_position(self, position: tuple) -> List:
+    def physics_rects_near_position(self, position: Vector2D) -> List:
         return [
-            pygame.Rect(
-                *(Vector2D(*tile["position"]) * self.tile_size),
-                self.tile_size,
-                self.tile_size
-            )
+            pygame.Rect(*(tile["position"] * self.tile_size), self.tile_size, self.tile_size)
             for tile in self.tiles_near_position(position=position)
             if tile["type"] in PHYSICS_TILES
         ]
@@ -61,12 +85,12 @@ class Tilemap:
         for tile in self.offgrid_tiles:
             surface.blit(
                 self.assets[tile["type"]][tile["variant"]],
-                (Vector2D(*tile["position"]) - camera_offset).to_list(),
+                (tile["position"] - camera_offset).coordinates,
             )
 
         # render only tiles which are on screen
         tiles_to_render = [
-            self.tilemap.get((xcoord, ycoord))
+            self.tilemap.get(str((xcoord, ycoord)))
             for xcoord in range(
                 camera_offset.x // self.tile_size,
                 (camera_offset.x + surface.get_width()) // self.tile_size + 1,
@@ -75,13 +99,11 @@ class Tilemap:
                 camera_offset.y // self.tile_size,
                 (camera_offset.y + surface.get_height()) // self.tile_size + 1,
             )
-            if self.tilemap.get((xcoord, ycoord))
+            if self.tilemap.get(str((xcoord, ycoord)))
         ]
 
         for tile in tiles_to_render:
             surface.blit(
                 self.assets[tile["type"]][tile["variant"]],
-                (
-                    Vector2D(*tile["position"]) * self.tile_size - camera_offset
-                ).to_list(),
+                (tile["position"] * self.tile_size - camera_offset).coordinates,
             )
