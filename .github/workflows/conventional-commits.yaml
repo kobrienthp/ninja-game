@@ -1,0 +1,20 @@
+name: Validate commit messages
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  lint-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Validate commit messages
+        uses: ahmadnassri/action-commit-lint@v2
+        with:
+          config: angular
